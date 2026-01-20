@@ -12,9 +12,12 @@ router = APIRouter(prefix="/api/users")
 
 @router.get("/me")
 async def get_me(
-    api_key: Annotated[str, Header(..., alias="api-key")],
     session: Annotated[AsyncSession, Depends(get_session)],
+    api_key: Annotated[str | None, Header(alias="api-key")] = None,
 ):
+    if api_key is None:
+        raise HTTPException(status_code=401, detail="No authorization")
+
     query = select(User).where(User.api_key == api_key)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
@@ -24,4 +27,4 @@ async def get_me(
 
     user_data: dict[str, Any] = {"id": user.id, "name": user.username, "followers": [], "following": []}
 
-    return {"result": "true", "user": user_data}
+    return {"result": True, "user": user_data}

@@ -36,9 +36,18 @@ def create_app():
 
     dist_path = Path("app/dist")
 
-    app.mount("/css", StaticFiles(directory=dist_path / "css"), name="css")
-    app.mount("/js", StaticFiles(directory=dist_path / "js"), name="js")
-    app.mount("/media", StaticFiles(directory=dist_path), name="media")
+    css_path = dist_path / "css"
+    js_path = dist_path / "js"
+
+    if css_path.exists():
+        app.mount("/css", StaticFiles(directory=css_path), name="css")
+
+    if js_path.exists():
+        app.mount("/js", StaticFiles(directory=js_path), name="js")
+
+    if dist_path.exists():
+        app.mount("/media", StaticFiles(directory=dist_path), name="media")
+
     app.include_router(router)
 
     @app.get("/favicon.ico", include_in_schema=False)
