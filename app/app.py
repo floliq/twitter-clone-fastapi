@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from starlette.responses import FileResponse, PlainTextResponse
 from starlette.staticfiles import StaticFiles
 
-from app.db import create_first_user, init_db
+from app.db import create_first_user
 from app.routing import router
 
 logging.basicConfig(
@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Server is running")
-    await init_db()
     await create_first_user()
     yield
     logger.info("Server is shutting dow")

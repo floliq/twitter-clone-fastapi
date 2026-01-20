@@ -11,17 +11,18 @@ repos:
   hooks:
     - id: mypy
       additional_dependencies: ["sqlmodel==0.0.31"]
-      exclude: ^(tests?|docs?|migrations|venv|.venv)/
+      exclude: ^(tests?|migrations|venv|.venv)/
       files: \.py$
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.14.13
   hooks:
     - id: ruff
       args: [ --fix, --show-fixes ]
+      exclude: ^(tests?|migrations|venv|.venv)/
     - id: ruff-format
 - repo: https://github.com/PyCQA/bandit
   rev: 1.9.2
   hooks:
     - id: bandit
-      exclude: ^(tests?|docs?|migrations|venv|.venv)/
+      exclude: ^(tests?|migrations|venv|.venv)/
       files: \.py$
