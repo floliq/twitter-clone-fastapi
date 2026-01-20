@@ -1,8 +1,12 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+import logging
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlmodel import select
 
 from app.config import settings
-from app.models import metadata, User
+from app.models import User, metadata
+
+logger = logging.getLogger(__name__)
 
 engine = create_async_engine(url=settings.DATABASE_URL, echo=True)
 async_session = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
@@ -22,13 +26,12 @@ async def create_first_user():
             first_user = User(
                 username="test_user",
                 api_key="test",
-                password_hash="hashed_password_here",
             )
             session.add(first_user)
             await session.commit()
-            print("Created first user: test_user")
+            logger.info("Created first user: test_user")
         else:
-            print(f"Database already has {len(users)} user(s)")
+            logger.info(f"Database already has {len(users)} user(s)")
 
 
 async def get_session():

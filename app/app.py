@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -5,17 +6,25 @@ from fastapi import FastAPI
 from starlette.responses import FileResponse, PlainTextResponse
 from starlette.staticfiles import StaticFiles
 
-from app.db import init_db, create_first_user
+from app.db import create_first_user, init_db
 from app.routing import router
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Server is running")
+    logger.info("Server is running")
     await init_db()
     await create_first_user()
     yield
-    print("Server is shutting dow")
+    logger.info("Server is shutting dow")
 
 
 def create_app():

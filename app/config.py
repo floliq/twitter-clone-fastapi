@@ -1,3 +1,5 @@
+import os
+
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,9 +13,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    DATABASE_URL: str
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
 
 settings = Settings()
-
-print(settings.model_dump())

@@ -1,23 +1,27 @@
-from fastapi import APIRouter, Header, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Annotated, Any
 
+from fastapi import APIRouter, Depends, Header, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 from app.db import get_session
 from app.models import User
-from sqlmodel import select
 
 router = APIRouter(prefix="/api/users")
 
 
 @router.get("/me")
 async def get_me(
-    api_key: str = Header(..., alias="api-key"),
-    session: AsyncSession = Depends(get_session),
+    api_key: Annotated[str, Header(..., alias="api-key")],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ):
     query = select(User).where(User.api_key == api_key)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
 
-    user_data = {"id": user.id, "name": user.username, "followers": [], "following": []}
+    if user is None:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    user_data: dict[str, Any] = {"id": user.id, "name": user.username, "followers": [], "following": []}
 
     return {"result": "true", "user": user_data}
