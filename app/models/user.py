@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class User(SQLModel, table=True):
@@ -11,8 +11,7 @@ class User(SQLModel, table=True):
     api_key: str
     created_at: datetime = Field(default=datetime.now())
 
+    tweets: list["Tweet"] = Relationship(back_populates="author")  # type: ignore[name-defined]  # NOQA F821
+
     def __repr__(self):
         return f"User: {self.username}"
-
-
-metadata = SQLModel.metadata

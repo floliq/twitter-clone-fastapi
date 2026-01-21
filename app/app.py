@@ -7,7 +7,8 @@ from starlette.responses import FileResponse, PlainTextResponse
 from starlette.staticfiles import StaticFiles
 
 from app.db import create_first_user
-from app.routing import router
+from app.routes.tweet import tweet_router
+from app.routes.user import user_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,7 +49,8 @@ def create_app():
     if dist_path.exists():
         app.mount("/media", StaticFiles(directory=dist_path), name="media")
 
-    app.include_router(router)
+    app.include_router(user_router)
+    app.include_router(tweet_router)
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon():

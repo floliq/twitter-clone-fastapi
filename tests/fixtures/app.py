@@ -1,12 +1,9 @@
-from typing import AsyncGenerator
-
 import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from app.app import create_app
 from app.db import get_session
-
 from app.models import metadata
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -15,7 +12,7 @@ engine = create_async_engine(DATABASE_URL, connect_args={"check_same_thread": Fa
 TestingSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-async def get_test_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_test_session():
     async with TestingSessionLocal() as session:
         yield session
 
@@ -45,7 +42,14 @@ async def client():
 
 
 @pytest.fixture
-async def auth_client():
+async def wrong_api_key_client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test", headers={"api-key": "wrong"}) as client:
+        yield client
+
+
+@pytest.fixture
+async def auth_client(sample_user):
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test", headers={"api-key": "test"}) as client:
         yield client

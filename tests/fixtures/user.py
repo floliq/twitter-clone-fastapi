@@ -1,5 +1,4 @@
 import pytest
-
 from app.models import User
 
 
@@ -14,4 +13,4 @@ async def sample_user(session):
     await session.commit()
     await session.refresh(user)
 
-    yield user
+    return user
