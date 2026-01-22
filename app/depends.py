@@ -4,8 +4,10 @@ from sqlmodel import select
 
 from app.db import get_session
 from app.models import User
+from app.repositories.media import MediaRepository
 from app.repositories.tweet import TweetRepository
 from app.repositories.user import UserRepository
+from app.services.media import MediaService
 from app.services.tweet import TweetService
 from app.services.user import UserService
 
@@ -39,3 +41,10 @@ def get_tweet_service(
 ):
     repository = TweetRepository(session)
     return TweetService(repository)
+
+
+def get_media_service(
+    session: AsyncSession = Depends(get_session),
+):
+    repository = MediaRepository(session)
+    return MediaService(repository)

@@ -7,7 +7,7 @@ wheels/
 *.egg-info
 .idea/
 
-media/
+app/media/
 logs/
 *.log
 

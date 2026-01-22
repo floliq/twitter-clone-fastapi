@@ -1,3 +1,4 @@
+aiofiles==25.1.0
 aiosqlite==0.22.1
 alembic==1.18.1
 annotated-doc==0.0.4
@@ -58,6 +59,7 @@ sqlmodel==0.0.31
 starlette==0.50.0
 stevedore==5.6.0
 typer==0.21.1
+types-aiofiles==25.1.0.20251011
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 uliweb-alembic==0.6.9

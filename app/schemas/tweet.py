@@ -22,3 +22,4 @@ class TweetCreateResponse(Response):
 
 class TweetCreate(BaseModel):
     tweet_data: str
+    tweet_media_ids: list[int] = Field(default_factory=list)

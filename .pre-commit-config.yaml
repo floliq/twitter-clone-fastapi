@@ -10,7 +10,7 @@ repos:
   rev: v1.19.1
   hooks:
     - id: mypy
-      additional_dependencies: ["sqlmodel==0.0.31"]
+      additional_dependencies: ["sqlmodel==0.0.31", "types-aiofiles"]
       exclude: ^(migrations|venv|.venv)/
       files: \.py$
 - repo: https://github.com/astral-sh/ruff-pre-commit

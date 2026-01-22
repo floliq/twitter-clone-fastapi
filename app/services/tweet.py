@@ -20,7 +20,7 @@ class TweetService:
                 id=tweet.id,
                 content=tweet.content,
                 author=author_schema,
-                attachments=[],
+                attachments=[attachment.path for attachment in tweet.attachments],
                 likes=[],
             )
             tweets_data.append(tweet_schema)
@@ -31,6 +31,6 @@ class TweetService:
         if not tweet_data.tweet_data.strip():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Tweet content cannot be empty")
 
-        tweet = await self.repository.create_new_tweet(content=tweet_data.tweet_data, author_id=author_id)
+        tweet = await self.repository.create_new_tweet(tweet_data=tweet_data, author_id=author_id)
 
         return TweetCreateResponse(result=True, tweet_id=tweet.id)

@@ -7,6 +7,7 @@ from starlette.responses import FileResponse, PlainTextResponse
 from starlette.staticfiles import StaticFiles
 
 from app.db import create_first_user
+from app.routes.media import media_router
 from app.routes.tweet import tweet_router
 from app.routes.user import user_router
 
@@ -17,6 +18,8 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+app_path = Path("app")
 
 
 @asynccontextmanager
@@ -34,11 +37,11 @@ def create_app():
         description="Twitter clone realized by FastAPI framework",
         lifespan=lifespan,
     )
-
-    dist_path = Path("app/dist")
+    dist_path = app_path / "dist"
 
     css_path = dist_path / "css"
     js_path = dist_path / "js"
+    media_path = app_path / "media"
 
     if css_path.exists():
         app.mount("/css", StaticFiles(directory=css_path), name="css")
@@ -47,10 +50,11 @@ def create_app():
         app.mount("/js", StaticFiles(directory=js_path), name="js")
 
     if dist_path.exists():
-        app.mount("/media", StaticFiles(directory=dist_path), name="media")
+        app.mount("/media", StaticFiles(directory=media_path), name="media")
 
     app.include_router(user_router)
     app.include_router(tweet_router)
+    app.include_router(media_router)
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon():
