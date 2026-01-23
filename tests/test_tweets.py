@@ -51,3 +51,27 @@ async def test_create_tweet_by_authorized(auth_client, attachment_without_tweet)
 
     assert response.status_code == 200
     assert response.json() == {"result": True, "tweet_id": 1}
+
+
+@pytest.mark.anyio
+async def test_delete_tweet_by_unauthorized(client, sample_tweet):
+    response = await client.delete(f"/api/tweets/{sample_tweet.id}")
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "API key is required"}
+
+
+@pytest.mark.anyio
+async def test_delete_unexist_tweet(auth_client):
+    response = await auth_client.delete("/api/tweets/15")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Tweet not found"}
+
+
+@pytest.mark.anyio
+async def test_delete_tweet_by_authorized(auth_client, sample_tweet):
+    response = await auth_client.delete(f"/api/tweets/{sample_tweet.id}")
+
+    assert response.status_code == 200
+    assert response.json() == {"result": True}

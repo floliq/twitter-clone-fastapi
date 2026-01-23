@@ -1,3 +1,6 @@
+from pathlib import Path
+
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
@@ -41,3 +44,29 @@ class TweetRepository:
         await self.session.refresh(new_tweet)
 
         return new_tweet
+
+    async def delete_tweet(self, tweet_id: int):
+        query = (
+            select(Tweet)
+            .where(Tweet.id == tweet_id)
+            .options(
+                selectinload(Tweet.attachments),  # type: ignore[arg-type]
+            )
+        )
+        result = await self.session.execute(query)
+        tweet = result.scalar_one_or_none()
+
+        if not tweet:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tweet not found")
+
+        app_path = Path("app")
+
+        for attachment in tweet.attachments:
+            file_path = app_path / attachment.path
+            if file_path.exists():
+                file_path.unlink()
+
+        await self.session.delete(tweet)
+        await self.session.commit()
+
+        return True

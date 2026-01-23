@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 
 from app.repositories.tweet import TweetRepository
+from app.schemas.response import Response
 from app.schemas.tweet import TweetCreate, TweetCreateResponse, TweetResponse, TweetSchema
 from app.schemas.user import AuthorSchema
 
@@ -34,3 +35,8 @@ class TweetService:
         tweet = await self.repository.create_new_tweet(tweet_data=tweet_data, author_id=author_id)
 
         return TweetCreateResponse(result=True, tweet_id=tweet.id)
+
+    async def delete_tweet(self, tweet_id: int):
+        tweet = await self.repository.delete_tweet(tweet_id)
+
+        return Response(result=tweet)
