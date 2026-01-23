@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 
 from app.repositories.tweet import TweetRepository
+from app.schemas.like import LikeSchema
 from app.schemas.response import Response
 from app.schemas.tweet import TweetCreate, TweetCreateResponse, TweetResponse, TweetSchema
 from app.schemas.user import AuthorSchema
@@ -15,14 +16,12 @@ class TweetService:
 
         tweets_data = []
         for tweet in tweets:
-            author_schema = AuthorSchema(id=tweet.author.id, name=tweet.author.username)
-
             tweet_schema = TweetSchema(
                 id=tweet.id,
                 content=tweet.content,
-                author=author_schema,
+                author=AuthorSchema(id=tweet.author.id, name=tweet.author.username),
                 attachments=[attachment.path for attachment in tweet.attachments],
-                likes=[],
+                likes=[LikeSchema(user_id=like.user.id, name=like.user.username) for like in tweet.likes],
             )
             tweets_data.append(tweet_schema)
 
@@ -37,6 +36,16 @@ class TweetService:
         return TweetCreateResponse(result=True, tweet_id=tweet.id)
 
     async def delete_tweet(self, tweet_id: int):
-        tweet = await self.repository.delete_tweet(tweet_id)
+        result = await self.repository.delete_tweet(tweet_id)
 
-        return Response(result=tweet)
+        return Response(result=result)
+
+    async def like_tweet(self, tweet_id: int, user_id: int):
+        result = await self.repository.like_tweet(tweet_id, user_id)
+
+        return Response(result=result)
+
+    async def remove_like_tweet(self, tweet_id: int, user_id: int):
+        result = await self.repository.remove_like_tweet(tweet_id, user_id)
+
+        return Response(result=result)

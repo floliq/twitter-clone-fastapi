@@ -15,6 +15,9 @@ class Tweet(SQLModel, table=True):
     attachments: list["Attachment"] = Relationship(  # type: ignore[name-defined]  # NOQA F821
         back_populates="tweet", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
+    likes: list["Like"] = Relationship(  # type: ignore[name-defined]  # NOQA F821
+        back_populates="tweet", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
 
     def __repr__(self):
         return f"Tweet: {self.author_id} {self.content}"

@@ -22,9 +22,27 @@ async def create_tweet(
 
 
 @tweet_router.delete("/{tweet_id}")
-async def delete_post(
+async def delete_tweet(
     tweet_id: int,
     current_user=Depends(get_current_user),
     tweet_service: TweetService = Depends(get_tweet_service),
 ):
     return await tweet_service.delete_tweet(tweet_id)
+
+
+@tweet_router.post("/{tweet_id}/likes")
+async def like_tweet(
+    tweet_id: int,
+    current_user=Depends(get_current_user),
+    tweet_service: TweetService = Depends(get_tweet_service),
+):
+    return await tweet_service.like_tweet(tweet_id, current_user.id)
+
+
+@tweet_router.delete("/{tweet_id}/likes")
+async def remove_like_tweet(
+    tweet_id: int,
+    current_user=Depends(get_current_user),
+    tweet_service: TweetService = Depends(get_tweet_service),
+):
+    return await tweet_service.remove_like_tweet(tweet_id, current_user.id)

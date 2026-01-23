@@ -10,7 +10,13 @@ async def test_get_tweets_by_unauthorized(client):
 
 @pytest.mark.anyio
 async def test_get_tweets_by_authorized(
-    auth_client, sample_user, sample_tweet, another_tweet, sample_attachment, another_attachment
+    auth_client,
+    sample_user,
+    sample_tweet,
+    another_tweet,
+    sample_attachment,
+    another_attachment,
+    sample_like_by_sample_user,
 ):
     response = await auth_client.get("/api/tweets")
     assert response.status_code == 200
@@ -22,7 +28,7 @@ async def test_get_tweets_by_authorized(
                 "content": sample_tweet.content,
                 "author": {"id": sample_user.id, "name": sample_user.username},
                 "attachments": [sample_attachment.path, another_attachment.path],
-                "likes": [],
+                "likes": [{"user_id": sample_user.id, "name": sample_user.username}],
             },
             {
                 "id": another_tweet.id,

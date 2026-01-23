@@ -12,6 +12,7 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default=datetime.now())
 
     tweets: list["Tweet"] = Relationship(back_populates="author")  # type: ignore[name-defined]  # NOQA F821
+    likes: list["Like"] = Relationship(back_populates="user")  # type: ignore[name-defined]  # NOQA F821
 
     def __repr__(self):
         return f"User: {self.username}"
