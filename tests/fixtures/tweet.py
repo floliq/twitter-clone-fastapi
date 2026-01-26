@@ -28,3 +28,17 @@ async def another_tweet(session, sample_user):
     await session.refresh(tweet)
 
     return tweet
+
+
+@pytest.fixture
+async def sample_tweet_by_another_user(session, another_user):
+    tweet = Tweet(
+        content="Test content 3",
+        author_id=another_user.id,
+    )
+
+    session.add(tweet)
+    await session.commit()
+    await session.refresh(tweet)
+
+    return tweet

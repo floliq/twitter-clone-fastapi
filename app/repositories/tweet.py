@@ -1,11 +1,12 @@
 from pathlib import Path
 
 from fastapi import HTTPException, status
+from sqlalchemy import func, literal
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
-from app.models import Attachment, Like, Tweet
+from app.models import Attachment, Follow, Like, Tweet
 from app.schemas.tweet import TweetCreate
 
 
@@ -14,15 +15,26 @@ class TweetRepository:
         self.session = session
 
     async def get_all_tweets_by_author(self, author_id: int):
+        following_subquery = (
+            select(Follow.follow_user_id).where(Follow.user_id == author_id).union_all(select(literal(author_id)))
+        )
+
         query = (
             select(Tweet)
-            .where(Tweet.author_id == author_id)
+            .where(Tweet.author_id.in_(following_subquery))  # type: ignore[attr-defined]
+            .outerjoin(Like)
+            .group_by(Tweet.id)  # type: ignore[arg-type]
+            .order_by(
+                func.count(Like.id).desc(),  # type: ignore[arg-type]
+                Tweet.id.desc(),  # type: ignore[union-attr]
+            )
             .options(
                 selectinload(Tweet.attachments),  # type: ignore[arg-type]
                 selectinload(Tweet.author),  # type: ignore[arg-type]
                 selectinload(Tweet.likes),  # type: ignore[arg-type]
             )
         )
+
         result = await self.session.execute(query)
         return result.scalars().all()
 

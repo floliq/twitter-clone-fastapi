@@ -17,6 +17,11 @@ async def test_get_tweets_by_authorized(
     sample_attachment,
     another_attachment,
     sample_like_by_sample_user,
+    sample_like_by_another_user,
+    sample_like_to_another_user_tweet,
+    sample_tweet_by_another_user,
+    sample_follow_by_sample_user,
+    another_user,
 ):
     response = await auth_client.get("/api/tweets")
     assert response.status_code == 200
@@ -28,7 +33,19 @@ async def test_get_tweets_by_authorized(
                 "content": sample_tweet.content,
                 "author": {"id": sample_user.id, "name": sample_user.username},
                 "attachments": [sample_attachment.path, another_attachment.path],
-                "likes": [{"user_id": sample_user.id, "name": sample_user.username}],
+                "likes": [
+                    {"user_id": sample_user.id, "name": sample_user.username},
+                    {"user_id": another_user.id, "name": another_user.username},
+                ],
+            },
+            {
+                "id": sample_tweet_by_another_user.id,
+                "content": sample_tweet_by_another_user.content,
+                "author": {"id": another_user.id, "name": another_user.username},
+                "attachments": [],
+                "likes": [
+                    {"user_id": sample_user.id, "name": sample_user.username},
+                ],
             },
             {
                 "id": another_tweet.id,
