@@ -14,5 +14,18 @@ class User(SQLModel, table=True):
     tweets: list["Tweet"] = Relationship(back_populates="author")  # type: ignore[name-defined]  # NOQA F821
     likes: list["Like"] = Relationship(back_populates="user")  # type: ignore[name-defined]  # NOQA F821
 
+    followers_relations: list["Follow"] = Relationship(  # type: ignore[name-defined]  # NOQA F821
+        back_populates="following_user",
+        sa_relationship_kwargs={
+            "foreign_keys": "[Follow.follow_user_id]",
+            "primaryjoin": "User.id == Follow.follow_user_id",
+        },
+    )
+
+    following_relations: list["Follow"] = Relationship(  # type: ignore[name-defined]  # NOQA F821
+        back_populates="follower",
+        sa_relationship_kwargs={"foreign_keys": "[Follow.user_id]", "primaryjoin": "User.id == Follow.user_id"},
+    )
+
     def __repr__(self):
         return f"User: {self.username}"

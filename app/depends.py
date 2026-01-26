@@ -1,9 +1,10 @@
 from fastapi import Depends, Header, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from app.db import get_session
-from app.models import User
+from app.models import Follow, User
 from app.repositories.media import MediaRepository
 from app.repositories.tweet import TweetRepository
 from app.repositories.user import UserRepository
@@ -19,7 +20,14 @@ async def get_current_user(
     if api_key is None:
         raise HTTPException(status_code=401, detail="API key is required")
 
-    query = select(User).where(User.api_key == api_key)
+    query = (
+        select(User)
+        .where(User.api_key == api_key)
+        .options(
+            selectinload(User.followers_relations).selectinload(Follow.follower),  # type: ignore[arg-type]
+            selectinload(User.following_relations).selectinload(Follow.following_user),  # type: ignore[arg-type]
+        )
+    )
     result = await session.execute(query)
     user = result.scalar_one_or_none()
 

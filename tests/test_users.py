@@ -16,12 +16,19 @@ async def test_get_me_by_wrong_api_key_client(wrong_api_key_client):
 
 
 @pytest.mark.anyio
-async def test_get_me_by_authorized(auth_client, sample_user):
+async def test_get_me_by_authorized(
+    auth_client, sample_user, another_user, sample_follow_by_sample_user, sample_follow_by_another_user
+):
     response = await auth_client.get("/api/users/me")
     assert response.status_code == 200
     assert response.json() == {
         "result": True,
-        "user": {"id": sample_user.id, "name": sample_user.username, "followers": [], "following": []},
+        "user": {
+            "id": sample_user.id,
+            "name": sample_user.username,
+            "followers": [{"id": another_user.id, "name": another_user.username}],
+            "following": [{"id": another_user.id, "name": another_user.username}],
+        },
     }
 
 
@@ -33,10 +40,17 @@ async def test_get_user_by_unauthorized(client, sample_user):
 
 
 @pytest.mark.anyio
-async def test_get_user_by_authorized(auth_client, another_user):
+async def test_get_user_by_authorized(
+    auth_client, another_user, sample_user, sample_follow_by_sample_user, sample_follow_by_another_user
+):
     response = await auth_client.get(f"/api/users/{another_user.id}")
     assert response.status_code == 200
     assert response.json() == {
         "result": True,
-        "user": {"id": another_user.id, "name": another_user.username, "followers": [], "following": []},
+        "user": {
+            "id": another_user.id,
+            "name": another_user.username,
+            "followers": [{"id": sample_user.id, "name": sample_user.username}],
+            "following": [{"id": sample_user.id, "name": sample_user.username}],
+        },
     }
