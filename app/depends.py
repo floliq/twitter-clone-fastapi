@@ -1,4 +1,6 @@
-from fastapi import Depends, Header, HTTPException
+from typing import Annotated, Any
+
+from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
@@ -12,13 +14,15 @@ from app.services.media import MediaService
 from app.services.tweet import TweetService
 from app.services.user import UserService
 
+DbSession = Annotated[AsyncSession, Depends(get_session)]
+
 
 async def get_current_user(
-    api_key: str | None = Header(None, alias="api-key"),
-    session: AsyncSession = Depends(get_session),
+    session: DbSession,
+    api_key: Annotated[str | None, Header(alias="api-key")] = None,
 ):
     if api_key is None:
-        raise HTTPException(status_code=401, detail="API key is required")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="API key is required")
 
     query = (
         select(User)
@@ -28,31 +32,37 @@ async def get_current_user(
             selectinload(User.following_relations).selectinload(Follow.following_user),  # type: ignore[arg-type]
         )
     )
-    result = await session.execute(query)
-    user = result.scalar_one_or_none()
+    user_result = await session.execute(query)
+    user = user_result.scalar_one_or_none()
 
     if user is None:
-        raise HTTPException(status_code=401, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
     return user
 
 
 def get_user_service(
-    session: AsyncSession = Depends(get_session),
+    session: DbSession,
 ):
     repository = UserRepository(session)
     return UserService(repository)
 
 
 def get_tweet_service(
-    session: AsyncSession = Depends(get_session),
+    session: DbSession,
 ):
     repository = TweetRepository(session)
     return TweetService(repository)
 
 
 def get_media_service(
-    session: AsyncSession = Depends(get_session),
+    session: DbSession,
 ):
     repository = MediaRepository(session)
     return MediaService(repository)
+
+
+CurrentUser = Annotated[Any, Depends(get_current_user)]
+MediaServiceAnnotation = Annotated[MediaService, Depends(get_media_service)]
+TweetServiceAnnotation = Annotated[TweetService, Depends(get_tweet_service)]
+UserServiceAnnotation = Annotated[UserService, Depends(get_user_service)]

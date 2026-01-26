@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from typing import Annotated
 
-from app.depends import get_current_user, get_media_service
-from app.services.media import MediaService
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
+
+from app.depends import CurrentUser, MediaServiceAnnotation
 
 media_router = APIRouter(prefix="/api/medias")
 
-ALLOWED_MIME = {"image/jpeg", "image/png", "image/webp", "video/mp4", "image/x-icon"}
+ALLOWED_MIME = ("image/jpeg", "image/png", "image/webp", "video/mp4", "image/x-icon")
 
 
 @media_router.post("")
 async def upload_medias(
-    file: UploadFile = File(...),
-    current_user=Depends(get_current_user),
-    media_service: MediaService = Depends(get_media_service),
+    current_user: CurrentUser, media_service: MediaServiceAnnotation, file: Annotated[UploadFile, File(...)]
 ):
     if file.content_type and file.content_type not in ALLOWED_MIME:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid picture file format")

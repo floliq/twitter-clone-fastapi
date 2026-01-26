@@ -36,16 +36,16 @@ class TweetService:
         return TweetCreateResponse(result=True, tweet_id=tweet.id)
 
     async def delete_tweet(self, tweet_id: int):
-        result = await self.repository.delete_tweet(tweet_id)
+        query_result = await self.repository.delete_tweet(tweet_id)
 
-        return Response(result=result)
+        return Response(result=query_result)
 
     async def like_tweet(self, tweet_id: int, user_id: int):
-        result = await self.repository.like_tweet(tweet_id, user_id)
+        query_result = await self.repository.like_tweet(tweet_id, user_id)
 
-        return Response(result=result)
+        return Response(result=query_result)
 
     async def remove_like_tweet(self, tweet_id: int, user_id: int):
-        result = await self.repository.remove_like_tweet(tweet_id, user_id)
+        query_result = await self.repository.remove_like_tweet(tweet_id, user_id)
 
-        return Response(result=result)
+        return Response(result=query_result)

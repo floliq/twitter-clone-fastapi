@@ -13,7 +13,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+    database_url: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
 
 settings = Settings()

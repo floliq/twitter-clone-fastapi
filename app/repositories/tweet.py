@@ -35,8 +35,8 @@ class TweetRepository:
             )
         )
 
-        result = await self.session.execute(query)
-        return result.scalars().all()
+        query_result = await self.session.execute(query)
+        return query_result.scalars().all()
 
     async def create_new_tweet(self, tweet_data: TweetCreate, author_id: int):
         new_tweet = Tweet(content=tweet_data.tweet_data, author_id=author_id)
@@ -47,27 +47,28 @@ class TweetRepository:
 
         attachments_ids = tweet_data.tweet_media_ids
 
-        for attachment_id in attachments_ids:
-            attachment = await self.session.get(Attachment, attachment_id)
-            if attachment and new_tweet.id is not None:
+        if attachments_ids and new_tweet.id is not None:
+            query_result = await self.session.execute(select(Attachment).where(Attachment.id.in_(attachments_ids)))  # type: ignore[union-attr]
+            attachments = query_result.scalars().all()
+
+            for attachment in attachments:
                 attachment.tweet_id = new_tweet.id
                 self.session.add(attachment)
 
-        await self.session.commit()
-        await self.session.refresh(new_tweet)
+            await self.session.commit()
+            await self.session.refresh(new_tweet)
 
         return new_tweet
 
     async def delete_tweet(self, tweet_id: int):
-        query = (
+        query_result = await self.session.execute(
             select(Tweet)
             .where(Tweet.id == tweet_id)
             .options(
                 selectinload(Tweet.attachments),  # type: ignore[arg-type]
             )
         )
-        result = await self.session.execute(query)
-        tweet = result.scalar_one_or_none()
+        tweet = query_result.scalar_one_or_none()
 
         if not tweet:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tweet not found")
@@ -87,8 +88,8 @@ class TweetRepository:
     async def like_tweet(self, tweet_id: int, user_id: int):
         query = select(Like).where(Like.tweet_id == tweet_id, Like.user_id == user_id)
 
-        result = await self.session.execute(query)
-        like = result.scalar_one_or_none()
+        query_result = await self.session.execute(query)
+        like = query_result.scalar_one_or_none()
 
         if like:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Like is already exists")
@@ -106,8 +107,8 @@ class TweetRepository:
     async def remove_like_tweet(self, tweet_id: int, user_id: int):
         query = select(Like).where(Like.tweet_id == tweet_id, Like.user_id == user_id)
 
-        result = await self.session.execute(query)
-        like = result.scalar_one_or_none()
+        query_result = await self.session.execute(query)
+        like = query_result.scalar_one_or_none()
 
         if not like:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Like not found")

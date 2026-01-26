@@ -23,17 +23,17 @@ class UserRepository:
             )
         )
 
-        result = await self.session.execute(query)
+        query_result = await self.session.execute(query)
 
-        user = result.scalar_one_or_none()
+        user = query_result.scalar_one_or_none()
 
         return user
 
     async def follow_user(self, follow_id: int, user_id: int):
         query = select(Follow).where(Follow.user_id == user_id, Follow.follow_user_id == follow_id)
 
-        result = await self.session.execute(query)
-        follow = result.scalar_one_or_none()
+        query_result = await self.session.execute(query)
+        follow = query_result.scalar_one_or_none()
 
         if follow:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Follow is already exists")
@@ -51,8 +51,8 @@ class UserRepository:
     async def unfollow_user(self, follow_id: int, user_id: int):
         query = select(Follow).where(Follow.user_id == user_id, Follow.follow_user_id == follow_id)
 
-        result = await self.session.execute(query)
-        follow = result.scalar_one_or_none()
+        query_result = await self.session.execute(query)
+        follow = query_result.scalar_one_or_none()
 
         if not follow:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Follow not found")

@@ -2,7 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI, status
 from starlette.responses import FileResponse, PlainTextResponse
 from starlette.staticfiles import StaticFiles
 
@@ -20,6 +20,25 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app_path = Path("app")
+dist_path = app_path / "dist"
+static_router = APIRouter(include_in_schema=False)
+
+
+@static_router.get("/favicon.ico")
+async def favicon():
+    return FileResponse(dist_path / "favicon.ico")
+
+
+@static_router.get("/")
+async def index():
+    return FileResponse(dist_path / "index.html")
+
+
+@static_router.get("/{full_path:path}")
+async def spa_fallback(full_path: str):
+    if full_path.startswith(("api", "media", "css", "js", "favicon.ico")):
+        return PlainTextResponse("Not Found", status_code=status.HTTP_404_NOT_FOUND)
+    return FileResponse(dist_path / "index.html")
 
 
 @asynccontextmanager
@@ -55,20 +74,6 @@ def create_app():
     app.include_router(user_router)
     app.include_router(tweet_router)
     app.include_router(media_router)
-
-    @app.get("/favicon.ico", include_in_schema=False)
-    async def favicon():
-        return FileResponse(dist_path / "favicon.ico")
-
-    # корневой index.html
-    @app.get("/", include_in_schema=False)
-    async def index():
-        return FileResponse(dist_path / "index.html")
-
-    @app.get("/{full_path:path}", include_in_schema=False)
-    async def spa_fallback(full_path: str):
-        if full_path.startswith(("api", "media", "css", "js", "favicon.ico")):
-            return PlainTextResponse("Not Found", status_code=404)
-        return FileResponse(dist_path / "index.html")
+    app.include_router(static_router)
 
     return app

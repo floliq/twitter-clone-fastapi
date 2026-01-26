@@ -41,11 +41,11 @@ class UserService:
         return UserMe(result=True, user=user_data)
 
     async def follow_user(self, follow_id: int, user_id):
-        result = await self.repository.follow_user(follow_id, user_id)
+        query_result = await self.repository.follow_user(follow_id, user_id)
 
-        return Response(result=result)
+        return Response(result=query_result)
 
     async def unfollow_user(self, follow_id: int, user_id):
-        result = await self.repository.unfollow_user(follow_id, user_id)
+        query_result = await self.repository.unfollow_user(follow_id, user_id)
 
-        return Response(result=result)
+        return Response(result=query_result)

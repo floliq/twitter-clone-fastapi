@@ -1,22 +1,21 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
-from app.depends import get_current_user, get_tweet_service
+from app.depends import CurrentUser, TweetServiceAnnotation
 from app.schemas.tweet import TweetCreate
-from app.services.tweet import TweetService
 
 tweet_router = APIRouter(prefix="/api/tweets")
 
 
 @tweet_router.get("")
-async def get_tweets(current_user=Depends(get_current_user), tweet_service: TweetService = Depends(get_tweet_service)):
+async def get_tweets(current_user: CurrentUser, tweet_service: TweetServiceAnnotation):
     return await tweet_service.get_all_tweets(current_user.id)
 
 
 @tweet_router.post("")
 async def create_tweet(
     tweet_data: TweetCreate,
-    current_user=Depends(get_current_user),
-    tweet_service: TweetService = Depends(get_tweet_service),
+    current_user: CurrentUser,
+    tweet_service: TweetServiceAnnotation,
 ):
     return await tweet_service.create_tweet(tweet_data, current_user.id)
 
@@ -24,8 +23,8 @@ async def create_tweet(
 @tweet_router.delete("/{tweet_id}")
 async def delete_tweet(
     tweet_id: int,
-    current_user=Depends(get_current_user),
-    tweet_service: TweetService = Depends(get_tweet_service),
+    current_user: CurrentUser,
+    tweet_service: TweetServiceAnnotation,
 ):
     return await tweet_service.delete_tweet(tweet_id)
 
@@ -33,8 +32,8 @@ async def delete_tweet(
 @tweet_router.post("/{tweet_id}/likes")
 async def like_tweet(
     tweet_id: int,
-    current_user=Depends(get_current_user),
-    tweet_service: TweetService = Depends(get_tweet_service),
+    current_user: CurrentUser,
+    tweet_service: TweetServiceAnnotation,
 ):
     return await tweet_service.like_tweet(tweet_id, current_user.id)
 
@@ -42,7 +41,7 @@ async def like_tweet(
 @tweet_router.delete("/{tweet_id}/likes")
 async def remove_like_tweet(
     tweet_id: int,
-    current_user=Depends(get_current_user),
-    tweet_service: TweetService = Depends(get_tweet_service),
+    current_user: CurrentUser,
+    tweet_service: TweetServiceAnnotation,
 ):
     return await tweet_service.remove_like_tweet(tweet_id, current_user.id)
