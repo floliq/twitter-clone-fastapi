@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from app.schemas.response import Response
 
 
-class UserMeResponse(BaseModel):
+class UserResponse(BaseModel):
     id: int
     name: str
     followers: list[dict] = Field(default_factory=list)
@@ -11,7 +11,7 @@ class UserMeResponse(BaseModel):
 
 
 class UserMe(Response):
-    user: UserMeResponse
+    user: UserResponse
 
 
 class AuthorSchema(BaseModel):
