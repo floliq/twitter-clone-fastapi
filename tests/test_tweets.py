@@ -5,7 +5,7 @@ import pytest
 async def test_get_tweets_by_unauthorized(client):
     response = await client.get("/api/tweets")
     assert response.status_code == 401
-    assert response.json() == {"detail": "API key is required"}
+    assert response.json() == {"result": False, "error_type": "auth_error", "error_message": "API key is required"}
 
 
 @pytest.mark.anyio
@@ -63,7 +63,7 @@ async def test_create_tweet_by_unauthorized(client):
     response = await client.post("/api/tweets", json={"tweet_data": "New tweet"})
 
     assert response.status_code == 401
-    assert response.json() == {"detail": "API key is required"}
+    assert response.json() == {"result": False, "error_type": "auth_error", "error_message": "API key is required"}
 
 
 @pytest.mark.anyio
@@ -81,7 +81,7 @@ async def test_delete_tweet_by_unauthorized(client, sample_tweet):
     response = await client.delete(f"/api/tweets/{sample_tweet.id}")
 
     assert response.status_code == 401
-    assert response.json() == {"detail": "API key is required"}
+    assert response.json() == {"result": False, "error_type": "auth_error", "error_message": "API key is required"}
 
 
 @pytest.mark.anyio

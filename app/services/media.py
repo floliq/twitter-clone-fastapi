@@ -2,8 +2,9 @@ import uuid
 from pathlib import Path
 
 import aiofiles
-from fastapi import HTTPException, UploadFile, status
+from fastapi import UploadFile, status
 
+from app.exception_handlers import CustomHTTPException
 from app.repositories.media import MediaRepository
 from app.schemas.media import Media
 
@@ -17,7 +18,11 @@ class MediaService:
 
     async def upload_file(self, upload_file: UploadFile):
         if not upload_file.filename:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename cannot be empty")
+            raise CustomHTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                error_type="validation_error",
+                error_message="Filename cannot be empty",
+            )
 
         upload_name = self._generate_upload_name(upload_file.filename)
         path_to = MEDIA_DIR / upload_name
@@ -27,7 +32,11 @@ class MediaService:
 
         if path_to.stat().st_size == 0:
             path_to.unlink(missing_ok=True)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot to upload empty file")
+            raise CustomHTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                error_type="validation_error",
+                error_message="Cannot to upload empty file",
+            )
 
         uploaded_file = await self.repository.upload_file(f"media/{upload_name}")
         return Media(result=True, media_id=uploaded_file.id)

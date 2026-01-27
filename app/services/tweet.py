@@ -1,5 +1,6 @@
-from fastapi import HTTPException, status
+from fastapi import status
 
+from app.exception_handlers import CustomHTTPException
 from app.repositories.tweet import TweetRepository
 from app.schemas.like import LikeSchema
 from app.schemas.response import Response
@@ -29,7 +30,11 @@ class TweetService:
 
     async def create_tweet(self, tweet_data: TweetCreate, author_id: int):
         if not tweet_data.tweet_data.strip():
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Tweet content cannot be empty")
+            raise CustomHTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                error_type="validation_error",
+                error_message="Tweet content cannot be empty",
+            )
 
         tweet = await self.repository.create_new_tweet(tweet_data=tweet_data, author_id=author_id)
 

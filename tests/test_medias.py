@@ -14,7 +14,7 @@ async def test_upload_media_by_unauthorized(client):
 
     response = await client.post("/api/medias", files=files)
     assert response.status_code == 401
-    assert response.json() == {"detail": "API key is required"}
+    assert response.json() == {"result": False, "error_type": "auth_error", "error_message": "API key is required"}
 
 
 @pytest.mark.anyio
@@ -47,7 +47,11 @@ async def test_upload_media_empty_content(auth_client):
 
     response = await auth_client.post("/api/medias", files=files)
     assert response.status_code == 400
-    assert response.json() == {"detail": "Cannot to upload empty file"}
+    assert response.json() == {
+        "result": False,
+        "error_type": "validation_error",
+        "error_message": "Cannot to upload empty file",
+    }
 
 
 @pytest.mark.anyio
@@ -58,4 +62,8 @@ async def test_upload_media_invalid_format(auth_client):
 
     response = await auth_client.post("/api/medias", files=files)
     assert response.status_code == 400
-    assert response.json() == {"detail": "Invalid picture file format"}
+    assert response.json() == {
+        "result": False,
+        "error_type": "validation_error",
+        "error_message": "Invalid picture file format",
+    }

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 
 from app.depends import CurrentUser, TweetServiceAnnotation
-from app.schemas.response import Response
+from app.schemas.response import Response, ResponseError
 from app.schemas.tweet import TweetCreate, TweetCreateResponse, TweetResponse
 
 tweet_router = APIRouter(prefix="/api/tweets")
@@ -21,6 +21,25 @@ tweet_router = APIRouter(prefix="/api/tweets")
         },
         401: {
             "description": "User is not authorized.",
+            "model": ResponseError,
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "no_api_key": {
+                            "summary": "No API key",
+                            "value": {
+                                "result": False,
+                                "error_type": "auth_error",
+                                "error_message": "API key is required",
+                            },
+                        },
+                        "invalid_api_key": {
+                            "summary": "Invalid API key",
+                            "value": {"result": False, "error_type": "auth_error", "error_message": "User not found"},
+                        },
+                    }
+                }
+            },
         },
     },
 )
@@ -48,14 +67,15 @@ async def get_tweets(
                     "examples": {
                         "empty_content": {
                             "summary": "Empty tweet content",
-                            "value": {"detail": "Tweet content cannot be empty"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Tweet content cannot be empty",
+                            },
                         },
                     }
                 }
             },
-        },
-        401: {
-            "description": "User is not authorized.",
         },
     },
 )
@@ -88,7 +108,11 @@ async def create_tweet(
                     "examples": {
                         "tweet_not_found": {
                             "summary": "Tweet not found",
-                            "value": {"detail": "Tweet not found"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Tweet not found",
+                            },
                         }
                     }
                 }
@@ -121,7 +145,11 @@ async def delete_tweet(
                     "examples": {
                         "like_exists": {
                             "summary": "Like already exists",
-                            "value": {"detail": "Like is already exists"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Like is already existsd",
+                            },
                         }
                     }
                 }
@@ -137,7 +165,11 @@ async def delete_tweet(
                     "examples": {
                         "tweet_not_found": {
                             "summary": "Tweet not found",
-                            "value": {"detail": "Tweet not found"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Tweet not found",
+                            },
                         }
                     }
                 }
@@ -167,7 +199,11 @@ async def like_tweet(
                     "examples": {
                         "like_not_found": {
                             "summary": "Like not found",
-                            "value": {"detail": "Like not found"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Like not found",
+                            },
                         }
                     }
                 }

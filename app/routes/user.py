@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 
 from app.depends import CurrentUser, UserServiceAnnotation
+from app.exception_handlers import CustomHTTPException
 from app.schemas.response import Response
 from app.schemas.user import UserMe
 
@@ -40,7 +41,11 @@ async def get_me(
                     "examples": {
                         "user_not_found": {
                             "summary": "User not found",
-                            "value": {"detail": "User not found"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "User not found",
+                            },
                         }
                     }
                 }
@@ -73,11 +78,19 @@ async def get_user_by_id(
                     "examples": {
                         "self_follow": {
                             "summary": "Attempt to follow self",
-                            "value": {"detail": "Can't follow to yourself"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Can't follow to yourself",
+                            },
                         },
                         "follow_exists": {
                             "summary": "Follow already exists",
-                            "value": {"detail": "Follow is already exists"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Follow is already exists",
+                            },
                         },
                     }
                 }
@@ -94,7 +107,11 @@ async def follow_user(
     user_service: UserServiceAnnotation,
 ):
     if follow_id == current_user.id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Can't follow to yourself")
+        raise CustomHTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            error_type="validation_error",
+            error_message="Can't follow to yourself",
+        )
 
     return await user_service.follow_user(follow_id, current_user.id)
 
@@ -113,7 +130,11 @@ async def follow_user(
                     "examples": {
                         "self_unfollow": {
                             "summary": "Attempt to unfollow self",
-                            "value": {"detail": "Can't unfollow to yourself"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Can't unfollow to yourself",
+                            },
                         }
                     }
                 }
@@ -126,7 +147,11 @@ async def follow_user(
                     "examples": {
                         "follow_not_found": {
                             "summary": "Follow not found",
-                            "value": {"detail": "Follow not found"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Follow not found",
+                            },
                         }
                     }
                 }
@@ -143,6 +168,10 @@ async def unfollow_user(
     user_service: UserServiceAnnotation,
 ):
     if follow_id == current_user.id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Can't unfollow to yourself")
+        raise CustomHTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            error_type="validation_error",
+            error_message="Can't unfollow to yourself",
+        )
 
     return await user_service.unfollow_user(follow_id, current_user.id)

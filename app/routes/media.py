@@ -1,9 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, File, UploadFile, status
 
 from app.depends import CurrentUser, MediaServiceAnnotation
+from app.exception_handlers import CustomHTTPException
 from app.schemas.media import Media
+from app.schemas.response import ResponseError
 
 media_router = APIRouter(prefix="/api/medias")
 
@@ -22,25 +24,38 @@ ALLOWED_MIME = ("image/jpeg", "image/png", "image/webp", "video/mp4", "image/x-i
     responses={
         400: {
             "description": "Bad Request. File format not allowed, empty filename or file, etc.",
+            "model": ResponseError,
             "content": {
                 "application/json": {
                     "examples": {
                         "invalid_format": {
                             "summary": "Invalid file format",
-                            "value": {"detail": "Invalid picture file format"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Invalid picture file format",
+                            },
                         },
                         "empty_filename": {
                             "summary": "Empty filename",
-                            "value": {"detail": "Filename cannot be empty"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Filename cannot be empty",
+                            },
                         },
                         "empty_file": {
                             "summary": "Empty file",
-                            "value": {"detail": "Cannot to upload empty file"},
+                            "value": {
+                                "result": False,
+                                "error_type": "validation_error",
+                                "error_message": "Cannot to upload empty file",
+                            },
                         },
                     }
                 }
             },
-        }
+        },
     },
 )
 async def upload_medias(
@@ -51,6 +66,10 @@ async def upload_medias(
     ],
 ):
     if file.content_type and file.content_type not in ALLOWED_MIME:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid picture file format")
+        raise CustomHTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            error_type="validation_error",
+            error_message="Invalid picture file format",
+        )
 
     return await media_service.upload_file(file)

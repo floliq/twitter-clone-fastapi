@@ -1,5 +1,6 @@
-from fastapi import HTTPException, status
+from fastapi import status
 
+from app.exception_handlers import CustomHTTPException
 from app.repositories.user import UserRepository
 from app.schemas.follow import FollowSchema
 from app.schemas.response import Response
@@ -27,7 +28,9 @@ class UserService:
         user = await self.repository.get_user_by_id(user_id)
 
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise CustomHTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, error_type="validation_error", error_message="User not found"
+            )
 
         followers_data = [
             FollowSchema(id=rel.follower.id, name=rel.follower.username) for rel in user.followers_relations

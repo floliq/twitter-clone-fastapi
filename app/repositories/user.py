@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 
-from fastapi import HTTPException, status
+from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
+from app.exception_handlers import CustomHTTPException
 from app.models import Follow, User
 
 
@@ -36,7 +37,11 @@ class UserRepository:
         follow = query_result.scalar_one_or_none()
 
         if follow:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Follow is already exists")
+            raise CustomHTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                error_type="validation_error",
+                error_message="Follow is already exists",
+            )
 
         new_follow = Follow(
             user_id=user_id,
@@ -55,7 +60,9 @@ class UserRepository:
         follow = query_result.scalar_one_or_none()
 
         if not follow:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Follow not found")
+            raise CustomHTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, error_type="validation_error", error_message="Follow not found"
+            )
 
         await self.session.delete(follow)
         await self.session.commit()

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
+from app.exception_handlers import CustomHTTPException
 from app.models import Attachment, Follow, Like, Tweet
 from app.schemas.tweet import TweetCreate
 
@@ -92,7 +93,11 @@ class TweetRepository:
         like = query_result.scalar_one_or_none()
 
         if like:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Like is already exists")
+            raise CustomHTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                error_type="validation_error",
+                error_message="Like is already exists",
+            )
 
         new_like = Like(
             tweet_id=tweet_id,
@@ -111,7 +116,9 @@ class TweetRepository:
         like = query_result.scalar_one_or_none()
 
         if not like:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Like not found")
+            raise CustomHTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, error_type="validation_error", error_message="Like not found"
+            )
 
         await self.session.delete(like)
         await self.session.commit()

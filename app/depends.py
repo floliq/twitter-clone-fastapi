@@ -1,11 +1,12 @@
 from typing import Annotated, Any
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from app.db import get_session
+from app.exception_handlers import CustomHTTPException
 from app.models import Follow, User
 from app.repositories.media import MediaRepository
 from app.repositories.tweet import TweetRepository
@@ -22,7 +23,9 @@ async def get_current_user(
     api_key: Annotated[str | None, Header(alias="api-key")] = None,
 ):
     if api_key is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="API key is required")
+        raise CustomHTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, error_type="auth_error", error_message="API key is required"
+        )
 
     query = (
         select(User)
@@ -36,7 +39,9 @@ async def get_current_user(
     user = user_result.scalar_one_or_none()
 
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise CustomHTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, error_type="auth_error", error_message="User not found"
+        )
 
     return user
 
