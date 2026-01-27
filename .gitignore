@@ -10,6 +10,7 @@ wheels/
 app/media/
 logs/
 *.log
+.coverage
 
 # Virtual environments
 .venv
