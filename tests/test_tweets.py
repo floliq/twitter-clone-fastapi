@@ -72,7 +72,7 @@ async def test_create_tweet_by_authorized(auth_client, attachment_without_tweet)
         "/api/tweets", json={"tweet_data": "New tweet", "tweet_media_ids": [attachment_without_tweet.id]}
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json() == {"result": True, "tweet_id": 1}
 
 

@@ -71,9 +71,9 @@ def create_app():
     if dist_path.exists():
         app.mount("/media", StaticFiles(directory=media_path), name="media")
 
-    app.include_router(user_router)
-    app.include_router(tweet_router)
-    app.include_router(media_router)
+    app.include_router(user_router, tags=["User"])
+    app.include_router(tweet_router, tags=["Tweet"])
+    app.include_router(media_router, tags=["Media"])
     app.include_router(static_router)
 
     return app
