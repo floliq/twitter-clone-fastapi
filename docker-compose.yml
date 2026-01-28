@@ -7,6 +7,10 @@ services:
       - "5432:5432"
     env_file:
       - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+    - app-network
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -t 1" ]
       interval: 10s
@@ -20,11 +24,20 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "80:80"
     env_file:
       - .env
     depends_on:
       postgres:
         condition: service_healthy
-    links:
-      - postgres
+    volumes:
+      - ./app/media:/twitter_clone/app/media
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

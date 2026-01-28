@@ -1,0 +1,28 @@
+server {
+        listen 80;
+
+        root /twitter_clone/frontend/;
+        index index.html;
+
+
+        location /api/ {
+                proxy_pass http://127.0.0.1:8000;
+                include proxy_params;
+        }
+
+        location /docs/ {
+                proxy_pass http://127.0.0.1:8000/docs;
+                include proxy_params;
+        }
+
+         location /media/ {
+                alias /twitter_clone/app/media/;
+                autoindex off;
+                expires 1y;
+                access_log off;
+        }
+
+        location / {
+                try_files $uri $uri/ /index.html;
+        }
+}

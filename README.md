@@ -9,7 +9,6 @@
 
 ## Структура проекта
 - main.py - Точка входа в приложение
-- app/dist/** - Frontend приложения
 - app/media/** - Медиа-файлы
 - app/models/** - ORM-модели
 - app/repositories/** - Репозитории (логика по работе с БД)
@@ -21,6 +20,7 @@
 - app/db.py - Логика БД
 - app/depends.py - Зависимости (Dependency injections)
 - app/exception_handlers.py - Обработчики ошибок
+- frontend/** - Frontend
 - migrations/** - Миграции БД
 - tests/** - Тесты приложения
 
@@ -80,12 +80,48 @@ alembic upgrade head
 
 ### 6. Запуск приложения
 ```bash
-python3 main.py
-```
-либо
-```bash
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-После этого API доступно по адресу: [http://localhost:8000](http://localhost:8000)
-Swagger: [http://localhost:8000/docs](http://localhost:8000/docs)
+### 7. Установка nginx
+```bash
+apt install nginx
+```
+
+### 8. Настройка конфига /nginx/local
+```
+server {
+        listen 80;
+
+        # Укажите папку до фронтенда
+        root /home/floliq/skillbox/Diploma/frontend;
+        index index.html;
+
+
+        location /api/ {
+                proxy_pass http://127.0.0.1:8000;
+                include proxy_params;
+        }
+
+        location /docs/ {
+                proxy_pass http://127.0.0.1:8000/docs;
+                include proxy_params;
+        }
+
+
+
+        location /media/ {
+                # Укажите папку до папки media
+                alias /home/floliq/skillbox/Diploma/app/media/;
+                expires 1y;
+                access_log off;
+        }
+
+        location / {
+                try_files $uri $uri/ /index.html;
+        }
+}
+```
+
+После этого API доступно по адресу: [http://localhost](http://localhost:8000)
+Swagger: [http://localhost/docs/](http://localhost:8000/docs)
